@@ -1,0 +1,44 @@
+#!/usr/bin/with-contenv bashio
+# vim: ft=bash
+# shellcheck shell=bash
+# ==============================================================================
+# Log a one-line Thread status summary every status_interval minutes, so the
+# border router's state can be read from the add-on log without shell access.
+# ==============================================================================
+
+declare interval
+
+interval="$(bashio::config 'status_interval')"
+if ((interval == 0)); then
+    exec sleep infinity
+fi
+
+o() {
+    ot-ctl "$@" 2>/dev/null | tr -d '\r' | grep -v '^Done$'
+}
+
+while true; do
+    state="$(o state | head -n1)"
+    rloc16="$(o rloc16 | head -n1)"
+    partition="$(o partitionid | head -n1)"
+    weight="$(o leaderweight | head -n1)"
+    routers="$(o router table | grep -cE '^\| +[0-9]+ ')"
+    children="$(o child table | grep -cE '^\| +[0-9]+ ')"
+    counters="$(o counters mle | awk -F': ' '
+        /^Role Detached/ {d = $2}
+        /^Partition Id Changes/ {p = $2}
+        END {printf "detached=%s partition-changes=%s", d, p}')"
+    netdata="$(o netdata show | awk '
+        /^Prefixes:/ {s = "p"; next}
+        /^Routes:/ {s = "r"; next}
+        /^Services:/ {s = "s"; next}
+        /^[A-Z][a-z]+:/ {s = ""; next}
+        s == "p" {p = p " " $1 " " $(NF - 1) "@" $NF}
+        s == "r" {r = r " " $1 " " $(NF - 1) "@" $NF}
+        s == "s" && $1 == "44970" && $2 ~ /^5[cd]/ {v = v " " $2 "@" $(NF - 1)}
+        END {printf "prefixes:%s | routes:%s | srp entries:%s", p, r, v}')"
+    srp="$(o srp server state | head -n1) $(o srp server addrmode | head -n1) seq=$(o srp server seqnum | head -n1) hosts=$(o srp server host | grep -c '^[^ ]')"
+
+    bashio::log.info "status: ${state} rloc16=${rloc16} partition=${partition} weight=${weight} routers=${routers} children=${children} ${counters} | ${netdata} | srp server: ${srp}"
+    sleep "$((interval * 60))"
+done

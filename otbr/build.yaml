@@ -1,0 +1,7 @@
+---
+# The upstream add-on image is the base; this add-on only replaces a few of
+# its scripts. Bump the tag together with the version in config.yaml, and
+# re-diff the files in rootfs/ against upstream on every bump.
+build_from:
+  aarch64: homeassistant/aarch64-addon-otbr:3.3.0
+  amd64: homeassistant/amd64-addon-otbr:3.3.0

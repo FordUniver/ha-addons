@@ -3,16 +3,24 @@
 # shellcheck shell=bash
 # ==============================================================================
 # OpenThread BorderRouter start script
+#
+# Patched copy of the upstream add-on's run script (3.3.0). Changes:
+#
+# - Without flow control, upstream always adds &uart-init-deassert to the radio
+#   URL. The Sonoff Dongle Plus MG24 wires DTR to the radio's reset line, so
+#   that holds it in reset and spinel never comes up. The uart_init_deassert
+#   option now controls it.
+# - The settings migration step is skipped. It only matters when moving to a
+#   different radio, and it opens the serial port with the same pin handling.
 # ==============================================================================
 
-# shellcheck source=./openthread_border_router/rootfs/etc/s6-overlay/scripts/otbr-agent-common
+# shellcheck source=./otbr/rootfs/etc/s6-overlay/scripts/otbr-agent-common
 . /etc/s6-overlay/scripts/otbr-agent-common
 
 declare backbone_if
 declare device
 declare baudrate
 declare flow_control
-declare migrate_flow_control
 declare otbr_log_level_int
 declare otbr_rest_listen
 declare otbr_rest_listen_port
@@ -52,10 +60,8 @@ flow_control=""
 
 if bashio::config.true 'flow_control'; then
     flow_control="&uart-flow-control"
-    migrate_flow_control="hardware"
-else
+elif bashio::config.true 'uart_init_deassert'; then
     flow_control="&uart-init-deassert"
-    migrate_flow_control="none"
 fi
 
 otbr_log_level_int="$(otbr_log_level_to_int)" \
@@ -126,14 +132,6 @@ fi
 # Store REST API listen information for check script
 echo "${otbr_rest_listen}" > /tmp/otbr-agent-rest-api
 echo "${otbr_rest_listen_port}" >> /tmp/otbr-agent-rest-api
-
-# Migrate OTBR settings to new adapter if needed
-bashio::log.info "Migrating OTBR settings if needed..."
-python3 /usr/local/bin/migrate_otbr_settings.py \
-    --adapter "${device}" \
-    --baudrate "${baudrate}" \
-    --flow-control "${migrate_flow_control}" \
-    --data-dir /data/thread/
 
 bashio::log.info "Starting otbr-agent..."
 # shellcheck disable=SC2086

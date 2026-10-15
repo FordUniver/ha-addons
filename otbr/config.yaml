@@ -1,0 +1,69 @@
+---
+# Based on the upstream openthread_border_router add-on. The first three
+# version parts are the upstream version this build starts from (build.yaml),
+# the fourth counts our revisions on top of it.
+version: 3.3.0.1
+slug: otbr
+name: OpenThread Border Router (patched)
+description: >-
+  Upstream OTBR add-on with options for radios without flow control (Sonoff
+  Dongle Plus MG24) and for staying in charge next to Apple border routers
+url: https://github.com/FordUniver/ha-addons/tree/main/otbr
+arch:
+  - aarch64
+  - amd64
+homeassistant: 2025.7.0
+gpio: true
+hassio_api: true
+discovery:
+  - otbr
+# IPC is only used within the Add-on
+host_ipc: false
+host_network: true
+host_uts: true
+privileged:
+  - IPC_LOCK
+  - NET_ADMIN
+  - NET_RAW
+devices:
+  - /dev/net/tun
+init: false
+options:
+  device: null
+  baudrate: "460800"
+  flow_control: false
+  uart_init_deassert: false
+  otbr_log_level: warning
+  firewall: true
+  nat64: false
+  beta: false
+  tx_power: 19
+  leader_weight: 72
+  take_leadership: true
+  omr_preference: high
+  srp_anycast: true
+  status_interval: 5
+ports:
+  8080/tcp: null
+  8081/tcp: null
+ports_description:
+  8080/tcp: OpenThread Web port
+  8081/tcp: OpenThread REST API port
+schema:
+  device: device(subsystem=tty)
+  baudrate: list(57600|115200|230400|460800|921600|1000000)
+  flow_control: bool
+  uart_init_deassert: bool
+  backbone_interface: str?
+  network_device: str?
+  otbr_log_level: list(debug|info|notice|warning|error|critical|alert|emergency)
+  firewall: bool
+  nat64: bool
+  beta: bool?
+  tx_power: int(-20,20)
+  leader_weight: int(0,255)
+  take_leadership: bool
+  omr_preference: list(default|low|med|high)
+  srp_anycast: bool
+  status_interval: int(0,1440)
+startup: services

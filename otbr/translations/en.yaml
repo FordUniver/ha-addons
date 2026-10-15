@@ -1,0 +1,86 @@
+---
+configuration:
+  device:
+    name: Device
+    description: The serial port where the OpenThread RCP radio is attached.
+  baudrate:
+    name: Baudrate
+    description: >-
+      The serial port baudrate used to communicate with the Silicon Labs radio.
+  flow_control:
+    name: Hardware flow control
+    description: Enable hardware flow control for serial port.
+  uart_init_deassert:
+    name: Deassert serial lines at start
+    description: >-
+      Deassert DTR and RTS when opening the serial port without flow control,
+      as upstream always does. Leave off for radios that wire DTR to the reset
+      line, such as the Sonoff Dongle Plus MG24, which it holds in reset.
+  backbone_interface:
+    name: Backbone Network Interface
+    description: >-
+      The network interface used for the backbone network.
+      If not specified, it falls back to the primary interface.
+  network_device:
+    name: Network Device
+    description: >-
+      <host:port> when connecting to a device via sockets (takes precedence
+      over above configuration). Not recommended! See documentation for more
+      information.
+  otbr_log_level:
+    name: OpenThread Border Router agent log level
+    description: >-
+      Set logging level of the OpenThread Border Router agent (otbr-agent).
+  firewall:
+    name: OTBR firewall
+    description: >-
+      Use OpenThread Border Router firewall to block unnecessary traffic.
+  nat64:
+    name: NAT64
+    description: >-
+      Enable IPv6 to IPv4 network address translation. This allows Thread
+      devices to communicate with devices on the Internet.
+  beta:
+    name: Beta
+    description: >-
+      Enable beta mode to run a newer, experimental version of OpenThread
+      Border Router.
+  tx_power:
+    name: TX power
+    description: >-
+      Radio transmit power in dBm. Upstream uses 6 so the controller does not
+      outreach other Thread routers, which avoids asymmetric links.
+  leader_weight:
+    name: Leader weight
+    description: >-
+      Weight compared when Thread partitions merge. Upstream OpenThread uses
+      64 and Apple border routers 68, so a value above 68 keeps leadership
+      here.
+  take_leadership:
+    name: Take leadership after start
+    description: >-
+      After a restart this border router usually rejoins as a plain router, so
+      the weight never gets compared. This starts a new partition as leader,
+      which the rest of the network then merges into.
+  omr_preference:
+    name: OMR prefix preference
+    description: >-
+      Preference of the local off-mesh routable prefix that devices use for
+      their addresses. Apple border routers publish theirs at medium, so high
+      keeps addresses on this border router's prefix. Default leaves
+      OpenThread's choice (low).
+  srp_anycast:
+    name: SRP server in anycast mode
+    description: >-
+      Publish the SRP server as an anycast entry with a sequence number that
+      is newer than Apple border routers use, so devices register here.
+      Upstream publishes a unicast entry, which loses against Apple's anycast
+      entry.
+  status_interval:
+    name: Status log interval
+    description: >-
+      Minutes between status lines in the log (state, partition, prefixes,
+      routes, SRP entries). 0 turns them off.
+network:
+  8080/tcp: OpenThread Web port
+  8081/tcp: OpenThread REST API port

@@ -2,7 +2,7 @@
 # Based on the upstream openthread_border_router add-on. The first three
 # version parts are the upstream version this build starts from (build.yaml),
 # the fourth counts our revisions on top of it.
-version: 3.3.0.1
+version: 3.3.0.2
 slug: otbr
 name: OpenThread Border Router (patched)
 description: >-
@@ -28,6 +28,7 @@ privileged:
 devices:
   - /dev/net/tun
 init: false
+watchdog: http://[HOST]:[PORT:8081]/node/state
 options:
   device: null
   baudrate: "460800"

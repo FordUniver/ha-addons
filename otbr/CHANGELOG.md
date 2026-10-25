@@ -1,5 +1,10 @@
 # Changelog
 
+## 3.3.0.2
+
+- Watchdog on the REST API's node state, so the Supervisor restarts a hung
+  agent.
+
 ## 3.3.0.1
 
 - Based on upstream 3.3.0.

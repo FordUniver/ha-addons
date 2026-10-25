@@ -46,6 +46,13 @@ partition, leader weight, router and child counts, the prefixes, routes and SRP
 entries in the network data, and the SRP server's state. That makes the
 border router's state readable from the add-on log alone.
 
+### Watchdog
+
+The agent can hang while its process stays alive, for example when its mDNS
+publisher wedges on a name conflict with another border router. With the
+add-on's Watchdog switch on, the Supervisor asks the REST API for the node's
+state every two minutes and restarts the add-on after two missed answers.
+
 ## Options
 
 The options shared with upstream keep their meaning; see the upstream
